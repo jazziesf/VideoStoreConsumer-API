@@ -1,3 +1,4 @@
+require 'pry'
 class MoviesController < ApplicationController
   before_action :require_movie, only: [:show]
 
@@ -11,6 +12,25 @@ class MoviesController < ApplicationController
     render status: :ok, json: data
   end
 
+  def create
+    @movie = Movie.new(movie_params)
+
+    @movie.image_url = movie_params["image_url"].slice(31..-1)
+
+    if @movie.save
+      flash[:success] = "Your movie #{@movie.title} has been added"
+      render status: :ok, json: data
+      redirect_to :root
+      redi
+    end
+    #
+    #
+    # else
+    #   render status: :bad_request, json: data
+    # end
+
+  end
+
   def show
     render(
       status: :ok,
@@ -22,6 +42,10 @@ class MoviesController < ApplicationController
   end
 
   private
+
+  def movie_params
+    params.require(:movie).permit(:title, :overview, :release_date, :inventory, :image_url, :external_id)
+  end
 
   def require_movie
     @movie = Movie.find_by(title: params[:title])
